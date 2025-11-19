@@ -1,4 +1,4 @@
-# EventView (Not Final Name)
+# Evwow - Event Viewer (Not Final Name)
 ## Name : 
 - R. Rafif Aqil Aabid Hermawan (5025231069)
 - Sinta Probondari Wardani (5025231067)
