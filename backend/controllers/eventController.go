@@ -33,7 +33,7 @@ func CreateEvent(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": results.Error})
 	}
 
-	c.JSON(http.StatusOK, newEvent)
+	c.JSON(http.StatusCreated, newEvent)
 }
 
 func GetEventAll(c *gin.Context) {
@@ -89,17 +89,35 @@ func UpdateEventByID(c *gin.Context) {
 	// Bind the data to the struct, then attempt to insert to DB
 
 	type eventUpdate struct {
-		UpdatedAt   time.Time `json:"created_at"`
-		Name        string    `json:"name"`
-		Description string    `json:"description"`
-		Location    string    `json:"location"`
-		TimeStart   time.Time `json:"time_start"`
+		Name        *string    `json:"name"`
+		Description *string    `json:"description"`
+		Location    *string    `json:"location"`
+		TimeStart   *time.Time `json:"time_start"`
 	}
 
 	updatedEventDetails := eventUpdate{}
 	if err := c.BindJSON(&updatedEventDetails); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
+
+	if updatedEventDetails.Name != nil {
+		event.Name = *updatedEventDetails.Name
+	}
+
+	if updatedEventDetails.Description != nil {
+		event.Description = *updatedEventDetails.Description
+	}
+
+	if updatedEventDetails.Location != nil {
+		event.Location = *updatedEventDetails.Location
+	}
+
+	if updatedEventDetails.TimeStart != nil {
+		event.TimeStart = *updatedEventDetails.TimeStart
+	}
+
+	initializers.DB.Save(&event)
 
 	c.JSON(http.StatusOK, gin.H{
 		"event": event,
@@ -120,7 +138,7 @@ func DeleteEventByIDSoft(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusOK)
+	c.Status(http.StatusNoContent)
 }
 
 func TestPing(c *gin.Context) {
