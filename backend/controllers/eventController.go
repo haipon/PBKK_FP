@@ -3,32 +3,43 @@ package controllers
 import (
 	"evora/initializers"
 	"evora/models"
+	"fmt"
 	"net/http"
+	"slices"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func CreateEvent(c *gin.Context) {
 	// Struct to bind JSON data with
-	type event struct {
-		CreatedAt   time.Time `json:"created_at"`
-		Name        string    `json:"name"`
-		Description string    `json:"description"`
-		Location    string    `json:"location"`
-		TimeStart   time.Time `json:"time_start"`
-	}
-
 	// Bind the data then insert to database
-	newEvent := event{}
+	newEvent := models.Event{}
 
 	if err := c.BindJSON(&newEvent); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 	}
 
+	// Generate new banner filename with UUI
+	fNameSlice := strings.Split(newEvent.BannerFileName, ".")
+
+	fmt.Println("Filetype:", fNameSlice[len(fNameSlice)-1])
+
+	approvedFormats := []string{"jpg", "jpeg", "png", "webp"}
+
+	if !slices.Contains(approvedFormats, fNameSlice[len(fNameSlice)-1]) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file type"})
+		return
+	}
+
+	newFilename := fmt.Sprintf("%s.%s", uuid.New().String(), fNameSlice[len(fNameSlice)-1])
+
+	newEvent.BannerFileName = newFilename
+
 	results := initializers.DB.Create(&newEvent)
 
-	// Send the appropriate data
 	if results.Error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": results.Error})
 	}
@@ -56,6 +67,7 @@ func GetEventFromID(c *gin.Context) {
 
 	if id == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
 	}
 
 	result := initializers.DB.First(&event, id)
@@ -77,6 +89,7 @@ func UpdateEventByID(c *gin.Context) {
 
 	if id == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
 	}
 
 	result := initializers.DB.First(&event, id)
@@ -129,6 +142,7 @@ func DeleteEventByIDSoft(c *gin.Context) {
 
 	if id == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		return
 	}
 
 	result := initializers.DB.Delete(&models.Event{}, id)
@@ -139,6 +153,32 @@ func DeleteEventByIDSoft(c *gin.Context) {
 	}
 
 	c.Status(http.StatusNoContent)
+}
+
+func UploadEventImage(c *gin.Context) {
+	// Check if the event exists
+	id := c.Param("id")
+	event := models.Event{}
+
+	result := initializers.DB.First(&event, id)
+
+	if result.Error != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Event doesn't exist"})
+		return
+	}
+
+	// Receive the Image from the client
+	file, err := c.FormFile("file")
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+
+	// Save the uploaded file
+	c.SaveUploadedFile(file, "./public/events/banner/"+event.BannerFileName)
+
+	c.String(http.StatusOK, fmt.Sprintf("'%s' uploaded!", file.Filename))
 }
 
 func TestPing(c *gin.Context) {

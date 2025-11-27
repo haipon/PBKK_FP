@@ -8,8 +8,9 @@ import (
 
 type Event struct {
 	gorm.Model
-	Name        string
-	Description string
-	Location    string
-	TimeStart   time.Time
+	Name           string    `json:"name"`
+	Description    string    `json:"description"`
+	Location       string    `json:"location"`
+	BannerFileName string    `json:"banner_file_name"`
+	TimeStart      time.Time `json:"time_start"`
 }
