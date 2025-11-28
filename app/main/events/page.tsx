@@ -1,9 +1,20 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Header from "../../component/header";
+import UserHeader from "../../component/userHeader";
 
 export default function EventsPage() {
+  const [authenticated, setAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setAuthenticated(!!token);
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
+      {authenticated ? <UserHeader /> : <Header />}
 
       {/* Banner */}
       <div className="w-full flex justify-center mt-6">

@@ -1,26 +1,26 @@
-import Header from "../../component/header"
+import UserHeader from "../../component/userHeader"
 
 export default function dashboard() {
   return (
     <>
-      <Header />
-      {/* <section className="relative h-screen flex items-center justify-center overflow-hidden"> */}
+      <UserHeader />
       <div className = "container mx-auto px-4 mt-10">
+        <h1 className="text-3xl font-bold mb-6 text-left">Welcome Back, User!</h1>
         <div className="overflow-x-auto shadow-lg border border-gray-300 rounded-lg">
             <table className="table w-full">
               <thead>
                 <tr className="bg-gray-100">
                   <th className="py-4 px-4 text-center">No.</th>
-                  <th className="py-4 px-4 text-center">File Name</th>
-                  <th className="py-4 px-4 text-center">File Type</th>
-                  <th className="py-4 px-4 text-center">Authorized Users</th>
-                  <th className="py-4 px-4 text-center">Download File Decrypted</th>
+                  <th className="py-4 px-4 text-center">Name</th>
+                  <th className="py-4 px-4 text-center">Description</th>
+                  <th className="py-4 px-4 text-center">Date</th>
+                  <th className="py-4 px-4 text-center">Location</th>
+                  <th className="py-4 px-4 text-center">Status</th>
                 </tr>
               </thead>
             </table>
           </div>
       </div>
-      {/* </section> */}
     </>
   );
 }
