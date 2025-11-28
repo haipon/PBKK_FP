@@ -20,6 +20,7 @@ func CreateEvent(c *gin.Context) {
 
 	if err := c.BindJSON(&newEvent); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
 	}
 
 	// Generate new banner filename with UUI
@@ -42,9 +43,10 @@ func CreateEvent(c *gin.Context) {
 
 	if results.Error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": results.Error})
+		return
 	}
 
-	c.JSON(http.StatusCreated, newEvent)
+	c.JSON(http.StatusOK, gin.H{"id": newEvent.ID})
 }
 
 func GetEventAll(c *gin.Context) {
@@ -178,7 +180,7 @@ func UploadEventImage(c *gin.Context) {
 	// Save the uploaded file
 	c.SaveUploadedFile(file, "./public/events/banner/"+event.BannerFileName)
 
-	c.String(http.StatusOK, fmt.Sprintf("'%s' uploaded!", file.Filename))
+	c.JSON(http.StatusOK, gin.H{"status": fmt.Sprintf("'%s' uploaded!", file.Filename)})
 }
 
 func TestPing(c *gin.Context) {
