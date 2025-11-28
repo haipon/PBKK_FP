@@ -3,7 +3,6 @@ package controllers
 import (
 	"evora/initializers"
 	"evora/models"
-	"fmt"
 	"net/http"
 	"os"
 	"time"
@@ -15,14 +14,14 @@ import (
 
 func Signup(c *gin.Context) {
 	var body struct {
-		Name     string `json:"name" binding:"required"`
-		Email    string `json:"email" binding:"required"`
+		Name     string `json:"name" binding:"required,min=1"`
+		Email    string `json:"email" binding:"required,email"`
 		Password string `json:"password" binding:"required"`
 	}
 
 	if c.BindJSON(&body) != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Failed to create the user",
+			"error": "Failed to create the user, insufficient data",
 		})
 		return
 	}
@@ -51,7 +50,7 @@ func Signup(c *gin.Context) {
 func Signin(c *gin.Context) {
 	// Check if the user exists in the database
 	var body struct {
-		Email    string `json:"email" binding:"required"`
+		Email    string `json:"email" binding:"required,email"`
 		Password string `json:"password" binding:"required"`
 	}
 
@@ -61,7 +60,6 @@ func Signin(c *gin.Context) {
 		})
 		return
 	}
-	fmt.Printf("Email : %v", body.Email)
 
 	user := models.User{}
 	result := initializers.DB.Where("email = ?", body.Email).First(&user)

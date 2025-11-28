@@ -3,6 +3,7 @@ package main
 import (
 	"evora/controllers"
 	"evora/initializers"
+	"evora/middleware"
 
 	"github.com/gin-gonic/gin"
 )
@@ -18,8 +19,6 @@ func main() {
 	// createEvent()
 
 	// Events
-	r.GET("/ping", controllers.TestPing)
-
 	r.GET("/events", controllers.GetEventAll)
 	r.GET("/events/:id", controllers.GetEventFromID)
 	r.POST("/events/create", controllers.CreateEvent)
@@ -31,6 +30,7 @@ func main() {
 	// Users
 	r.POST("/signup", controllers.Signup)
 	r.GET("/login", controllers.Signin)
+	r.GET("/ping", middleware.RequireAuth, controllers.TestPing)
 
 	r.Run("127.0.0.1:8080")
 }
