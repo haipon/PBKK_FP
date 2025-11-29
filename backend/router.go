@@ -23,7 +23,7 @@ func main() {
 
 	// Users
 	r.POST("/signup", controllers.Signup)
-	r.GET("/login", controllers.Signin)
+	r.POST("/login", controllers.Signin)
 
 	// --- For user only ---
 	authorized := r.Group("/")
@@ -39,7 +39,6 @@ func main() {
 		// Users
 		authorized.GET("/profile/events", controllers.GetEventCreatedByUser)
 		authorized.GET("/profile/booked", controllers.GetEventBookedByUser)
-		// authorized.GET("/profile/booked", controllers.GetEventBookedByUser)
 
 		// Testing
 		authorized.GET("/ping", controllers.TestPing)
