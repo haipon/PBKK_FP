@@ -34,6 +34,12 @@ func main() {
 		authorized.PATCH("/events/update/:id", controllers.UpdateEventByID)
 		authorized.POST("/events/update/images/:id", controllers.UploadEventImage)
 		authorized.DELETE("/events/update/:id", controllers.DeleteEventByIDSoft)
+		authorized.POST("/events/:id/book", controllers.BookEvent)
+
+		// Users
+		authorized.GET("/profile/events", controllers.GetEventCreatedByUser)
+		authorized.GET("/profile/booked", controllers.GetEventBookedByUser)
+		// authorized.GET("/profile/booked", controllers.GetEventBookedByUser)
 
 		// Testing
 		authorized.GET("/ping", controllers.TestPing)

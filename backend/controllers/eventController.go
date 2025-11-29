@@ -13,17 +13,22 @@ import (
 	"github.com/google/uuid"
 )
 
+// Creation
 func CreateEvent(c *gin.Context) {
 	// Retrieve the user information from context
 	u, exists := c.Get("user")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized access"})
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": "Unauthorized access",
+		})
 		return
 	}
 
 	user, ok := u.(models.User)
 	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot obtain user form context"})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Cannot obtain user form context",
+		})
 		return
 	}
 
@@ -37,7 +42,9 @@ func CreateEvent(c *gin.Context) {
 	}
 
 	if err := c.BindJSON(&event); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err,
+		})
 		return
 	}
 
@@ -49,7 +56,9 @@ func CreateEvent(c *gin.Context) {
 	approvedFormats := []string{"jpg", "jpeg", "png", "webp"}
 
 	if !slices.Contains(approvedFormats, fNameSlice[len(fNameSlice)-1]) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file type"})
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid file type",
+		})
 		return
 	}
 
@@ -84,7 +93,9 @@ func UploadEventImage(c *gin.Context) {
 	result := initializers.DB.First(&event, id)
 
 	if result.Error != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Event doesn't exist"})
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Event doesn't exist",
+		})
 		return
 	}
 
@@ -92,7 +103,9 @@ func UploadEventImage(c *gin.Context) {
 	file, err := c.FormFile("file")
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err,
+		})
 		return
 	}
 
@@ -102,12 +115,57 @@ func UploadEventImage(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"status": fmt.Sprintf("'%s' uploaded!", file.Filename)})
 }
 
+func BookEvent(c *gin.Context) {
+	// Retrieve the user information from context
+	u, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": "Unauthorized access",
+		})
+		return
+	}
+
+	user, ok := u.(models.User)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Cannot obtain user form context",
+		})
+		return
+	}
+
+	// Retrieve event
+	id := c.Param("id")
+	event := []models.Event{}
+	result := initializers.DB.First(&event, id)
+
+	if result.Error != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "No items",
+		})
+		return
+	}
+
+	// Associate the event with the user
+	err := initializers.DB.Model(&user).Association("BookedEvents").Append(&event)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+	}
+
+	// Successful
+	c.Status(http.StatusOK)
+
+}
+
+// Retrieve
 func GetEventAll(c *gin.Context) {
 	event := []models.Event{}
 	result := initializers.DB.Find(&event)
 
 	if result.Error != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "No items"})
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "No items",
+		})
 		return
 	}
 
@@ -137,13 +195,82 @@ func GetEventFromID(c *gin.Context) {
 	})
 }
 
+func GetEventCreatedByUser(c *gin.Context) {
+	// Retrieve the user information from context
+	u, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized access"})
+		return
+	}
+
+	user, ok := u.(models.User)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot obtain user form context"})
+		return
+	}
+
+	// Retrieve the event created by the user
+	event := []models.Event{}
+	err := initializers.DB.Model(&user).Association("Events").Find(&event)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"event": event,
+	})
+
+}
+
+func GetEventBookedByUser(c *gin.Context) {
+	// Retrieve the user information from context
+	u, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": "Unauthorized access",
+		})
+		return
+	}
+
+	user, ok := u.(models.User)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Cannot obtain user form context",
+		})
+		return
+	}
+
+	// Retrieve the event booked by the user
+	event := []models.Event{}
+	err := initializers.DB.Model(&user).Association("BookedEvents").Find(&event)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"event": event,
+	})
+
+}
+
+// Update/Delete
 func UpdateEventByID(c *gin.Context) {
 	// Fetch the ID then try to retrieve the data from DB
 	id := c.Param("id")
 	event := models.Event{}
 
 	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid ID",
+		})
 		return
 	}
 
@@ -164,7 +291,9 @@ func UpdateEventByID(c *gin.Context) {
 
 	updatedEventDetails := eventUpdate{}
 	if err := c.BindJSON(&updatedEventDetails); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
 		return
 	}
 
@@ -195,14 +324,18 @@ func DeleteEventByIDSoft(c *gin.Context) {
 	id := c.Param("id")
 
 	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid ID",
+		})
 		return
 	}
 
 	result := initializers.DB.Delete(&models.Event{}, id)
 
 	if result.Error != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": result.Error})
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": result.Error,
+		})
 		return
 	}
 

@@ -19,7 +19,7 @@ func Signup(c *gin.Context) {
 		Password string `json:"password" binding:"required"`
 	}
 
-	if c.BindJSON(&body) != nil {
+	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "Failed to create the user, insufficient data",
 		})
@@ -30,7 +30,7 @@ func Signup(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Failed to hash the password",
+			"error": "Invalid email or password",
 		})
 		return
 	}
@@ -54,7 +54,7 @@ func Signin(c *gin.Context) {
 		Password string `json:"password" binding:"required"`
 	}
 
-	if c.BindJSON(&body) != nil {
+	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "Invalid credentials",
 		})
@@ -66,7 +66,7 @@ func Signin(c *gin.Context) {
 
 	if result.Error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "No users",
+			"error": "Invalid credentials",
 		})
 		return
 	}
@@ -75,7 +75,7 @@ func Signin(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Wrong Password",
+			"error": "Invalid credentials",
 		})
 		return
 	}
@@ -98,8 +98,14 @@ func Signin(c *gin.Context) {
 
 	// Send the token to the user
 	c.SetSameSite(http.SameSiteLaxMode)
-	c.SetCookie("Authorization", tokenString, 3600&24*30, "", "", false, true)
+	c.SetCookie("Authorization", tokenString, 3600*24*30, "/", "", false, true)
 
-	c.Status(http.StatusOK)
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Logged in successfully",
+		"user": gin.H{
+			"name":  user.Name,
+			"email": user.Email,
+		},
+	})
 
 }
