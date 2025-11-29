@@ -5,7 +5,7 @@ export default function UserHeader() {
   return (
     <header className="w-full pl-35 pr-30 py-7 flex justify-center items-center">
       <div className="flex items-center justify-between w-full"> 
-        <div className="flex-shrink-0">
+        <div className="shrink-0">
           <Image 
             src="/logo.png" 
             alt="Logo" 
@@ -30,7 +30,7 @@ export default function UserHeader() {
           </Link>
         </div>
         
-        <div className="flex space-x-4 items-center justify-center flex-shrink-0"> 
+        <div className="flex space-x-4 items-center justify-center shrink-0"> 
           <Link href="/" className="bg-[#6876A8] px-4 py-2 rounded-xl text-white hover:bg-[#4F567E] text-lg font-bold">
             Log out
           </Link>
