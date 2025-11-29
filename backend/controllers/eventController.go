@@ -14,17 +14,35 @@ import (
 )
 
 func CreateEvent(c *gin.Context) {
-	// Struct to bind JSON data with
-	// Bind the data then insert to database
-	newEvent := models.Event{}
+	// Retrieve the user information from context
+	u, exists := c.Get("user")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized access"})
+		return
+	}
 
-	if err := c.BindJSON(&newEvent); err != nil {
+	user, ok := u.(models.User)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Cannot obtain user form context"})
+		return
+	}
+
+	// Bind the data then insert to database
+	var event struct {
+		Name           string    `json:"name" binding:"required"`
+		Description    string    `json:"description" binding:"required"`
+		Location       string    `json:"location" binding:"required"`
+		BannerFileName string    `json:"banner_file_name" binding:"required"`
+		TimeStart      time.Time `json:"time_start" binding:"required"`
+	}
+
+	if err := c.BindJSON(&event); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
 	}
 
-	// Generate new banner filename with UUI
-	fNameSlice := strings.Split(newEvent.BannerFileName, ".")
+	// Generate new banner filename with UUID
+	fNameSlice := strings.Split(event.BannerFileName, ".")
 
 	fmt.Println("Filetype:", fNameSlice[len(fNameSlice)-1])
 
@@ -37,16 +55,51 @@ func CreateEvent(c *gin.Context) {
 
 	newFilename := fmt.Sprintf("%s.%s", uuid.New().String(), fNameSlice[len(fNameSlice)-1])
 
-	newEvent.BannerFileName = newFilename
+	event.BannerFileName = newFilename
 
-	results := initializers.DB.Create(&newEvent)
+	// Create database entry, then associate it with the user that inserted them
+	newEvent := models.Event{
+		Name:           event.Name,
+		Description:    event.Description,
+		Location:       event.Location,
+		BannerFileName: event.BannerFileName,
+		TimeStart:      event.TimeStart,
+	}
 
-	if results.Error != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": results.Error})
+	err := initializers.DB.Model(&user).Association("Events").Append(&newEvent)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+	}
+
+	// Return ID for uploading images UploadEventImage
+	c.JSON(http.StatusOK, gin.H{"id": newEvent.ID})
+}
+
+func UploadEventImage(c *gin.Context) {
+	// Check if the event exists
+	id := c.Param("id")
+	event := models.Event{}
+
+	result := initializers.DB.First(&event, id)
+
+	if result.Error != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Event doesn't exist"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"id": newEvent.ID})
+	// Receive the Image from the client
+	file, err := c.FormFile("file")
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+
+	// Save the uploaded file
+	c.SaveUploadedFile(file, "./public/events/banner/"+event.BannerFileName)
+
+	c.JSON(http.StatusOK, gin.H{"status": fmt.Sprintf("'%s' uploaded!", file.Filename)})
 }
 
 func GetEventAll(c *gin.Context) {
@@ -102,7 +155,6 @@ func UpdateEventByID(c *gin.Context) {
 	}
 
 	// Bind the data to the struct, then attempt to insert to DB
-
 	type eventUpdate struct {
 		Name        *string    `json:"name"`
 		Description *string    `json:"description"`
@@ -155,32 +207,6 @@ func DeleteEventByIDSoft(c *gin.Context) {
 	}
 
 	c.Status(http.StatusNoContent)
-}
-
-func UploadEventImage(c *gin.Context) {
-	// Check if the event exists
-	id := c.Param("id")
-	event := models.Event{}
-
-	result := initializers.DB.First(&event, id)
-
-	if result.Error != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Event doesn't exist"})
-		return
-	}
-
-	// Receive the Image from the client
-	file, err := c.FormFile("file")
-
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err})
-		return
-	}
-
-	// Save the uploaded file
-	c.SaveUploadedFile(file, "./public/events/banner/"+event.BannerFileName)
-
-	c.JSON(http.StatusOK, gin.H{"status": fmt.Sprintf("'%s' uploaded!", file.Filename)})
 }
 
 func TestPing(c *gin.Context) {
