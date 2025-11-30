@@ -3,6 +3,7 @@ package middleware
 import (
 	"evora/initializers"
 	"evora/models"
+	"fmt"
 	"net/http"
 	"os"
 	"time"
@@ -16,6 +17,7 @@ func RequireAuth(c *gin.Context) {
 	tokenString, err := c.Cookie("Authorization")
 
 	if err != nil {
+		fmt.Println("Middleware Error: Cookie 'Authorization' not found")
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
@@ -28,6 +30,13 @@ func RequireAuth(c *gin.Context) {
 	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
 	if err != nil {
 		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	if err != nil || !token.Valid {
+		// DEBUG: Print why token is invalid
+		fmt.Println("❌ Middleware Error: Token invalid:", err)
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 		return
 	}
 

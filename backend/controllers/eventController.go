@@ -39,6 +39,7 @@ func CreateEvent(c *gin.Context) {
 		Location       string    `json:"location" binding:"required"`
 		BannerFileName string    `json:"banner_file_name" binding:"required"`
 		TimeStart      time.Time `json:"time_start" binding:"required"`
+		TimeEnd        time.Time `json:"time_end" binding:"required"`
 	}
 
 	if err := c.BindJSON(&event); err != nil {
@@ -73,6 +74,7 @@ func CreateEvent(c *gin.Context) {
 		Location:       event.Location,
 		BannerFileName: event.BannerFileName,
 		TimeStart:      event.TimeStart,
+		TimeEnd:        event.TimeEnd,
 	}
 
 	err := initializers.DB.Model(&user).Association("Events").Append(&newEvent)
@@ -150,6 +152,7 @@ func BookEvent(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
 	}
 
 	// Successful

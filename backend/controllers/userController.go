@@ -109,3 +109,22 @@ func Signin(c *gin.Context) {
 	})
 
 }
+
+func Signout(c *gin.Context) {
+	c.SetSameSite(http.SameSiteLaxMode)
+	c.SetCookie("Authorization", "", -1, "/", "", false, true)
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Logged out successfully",
+	})
+}
+
+func Validate(c *gin.Context) {
+	// Get user from context
+	user, _ := c.Get("user")
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "I am logged in",
+		"user":    user,
+	})
+}

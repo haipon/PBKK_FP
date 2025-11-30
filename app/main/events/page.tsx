@@ -1,19 +1,18 @@
-import EventsPageView from "./EventsPageView";
+import EventsClientView from "./EventsPageView";
+import { getPublicEventsServerSide } from "../../services/serverEventService";
+import { cookies } from "next/headers"; // Import cookies to check auth
 
-// Fetch the data from the backend
-async function getEvents() {
-  const res = await fetch('http://127.0.0.1:8080/events', {
-    cache: 'no-store',
-  });
+export default async function EventsPage() {
+  const events = await getPublicEventsServerSide();
 
-  if (!res.ok) throw new Error('Failed to fetch events');
-  return res.json();
-}
+  const cookieStore = await cookies();
+  const token = cookieStore.get("Authorization");
+  const isAuthenticated = !!token;
 
-export default async function EventsView() {
-  const response = await getEvents();
-
-  console.log("API Response:", response);
-
-  return <EventsPageView events={response.event} />;
+  return (
+    <EventsClientView 
+      events={events} 
+      isAuthenticated={isAuthenticated} 
+    />
+  );
 }

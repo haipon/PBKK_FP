@@ -4,21 +4,24 @@ import { useEffect, useState } from "react";
 import Header from "../../component/header";
 import UserHeader from "../../component/userHeader";
 
-interface EventsPageViewProps {
-  events: any[];
+interface Event {
+  ID: number;
+  Name: string;
+  Description: string;
+  Location: string;
+  BannerFileName: string;
+  TimeStart: string;
 }
 
-export default function EventsPageView({ events }: EventsPageViewProps) {
-  const [authenticated, setAuthenticated] = useState(false);
+interface EventsPageViewProps {
+  events: Event[];
+  isAuthenticated: boolean;
+}
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    setAuthenticated(!!token);
-  }, []);
-
+export default function EventsPageView({ events, isAuthenticated }: EventsPageViewProps) {
   return (
     <div className="min-h-screen flex flex-col">
-      {authenticated ? <UserHeader /> : <Header />}
+      {isAuthenticated ? <UserHeader /> : <Header />}
 
       {/* Banner */}
       <div className="w-full flex justify-center mt-6">
@@ -29,9 +32,12 @@ export default function EventsPageView({ events }: EventsPageViewProps) {
             className="w-full h-48 object-cover"
           />
           <div className="absolute inset-0 bg-black bg-opacity-30 flex flex-col items-center justify-center text-white">
-            <h2 className="text-2xl font-semibold">Look Forward to these Events!</h2>
+            <h2 className="text-2xl font-semibold">
+              Look Forward to these Events!
+            </h2>
             <p className="text-sm mt-2">
-              Find out the current events that are available near you and the upcoming events
+              Find out the current events that are available near you and the
+              upcoming events
             </p>
           </div>
         </div>
@@ -43,12 +49,13 @@ export default function EventsPageView({ events }: EventsPageViewProps) {
 
         <div className="h-40 bg-[#D4DBE9] rounded-xl flex items-center justify-center text-black text-lg font-bold shadow-md">
           <div className="grid gap-4">
-            {events && events.map((event: any) => (
-              <div key={event.ID} className="border p-4 rounded">
-                <h2>{event.Name}</h2>
-                <p>{event.Description}</p>
-              </div>
-            ))}
+            {events &&
+              events.map((event: Event) => (
+                <div key={event.ID} className="border p-4 rounded">
+                  <h2>{event.Name}</h2>
+                  <p>{event.Description}</p>
+                </div>
+              ))}
 
             {(!events || events.length === 0) && <p>No events found.</p>}
           </div>

@@ -4,6 +4,7 @@ import (
 	"evora/initializers"
 	"evora/models"
 	"fmt"
+	"log"
 )
 
 func init() {
@@ -12,6 +13,10 @@ func init() {
 }
 
 func main() {
-	initializers.DB.AutoMigrate(&models.Event{}, &models.User{})
+	err := initializers.DB.AutoMigrate(&models.Event{}, &models.User{})
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
 	fmt.Println("Database successfully created!")
 }

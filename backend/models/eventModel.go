@@ -13,6 +13,7 @@ type Event struct {
 	Location       string
 	BannerFileName string
 	TimeStart      time.Time
+	TimeEnd        time.Time
 	UserID         uint    `json:"-"`
 	BookedBy       []*User `gorm:"many2many:user_events;" json:"-"`
 }

@@ -50,10 +50,12 @@ func main() {
 		// Users
 		authorized.GET("/profile/events", controllers.GetEventCreatedByUser)
 		authorized.GET("/profile/booked", controllers.GetEventBookedByUser)
+		authorized.GET("/validate", controllers.Validate)
+		r.POST("/logout", controllers.Signout)
 
 		// Testing
 		authorized.GET("/ping", controllers.TestPing)
 	}
 
-	r.Run("127.0.0.1:8080")
+	r.Run("localhost:8080")
 }
