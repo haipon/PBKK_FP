@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState, useRef  } from "react";
 import UserHeader from "../../component/userHeader"
 
 interface DashboardEvent {
@@ -16,6 +17,18 @@ interface DashboardPageViewProps {
 }
 
 export default function DashboardPageView({ events }: DashboardPageViewProps) {
+  const [openModal, setOpenModal] = useState(false);
+  const [fileName, setFileName] = useState("");
+
+  const fileRef = useRef<HTMLInputElement | null>(null);
+
+  const handleCloseModal = () => {
+    setFileName("");
+    if (fileRef.current) fileRef.current.value = "";
+    setOpenModal(false);
+  };
+
+
   const getEventStatus = (startStr: string, endStr: string) => {
     const now = new Date();
     const start = new Date(startStr);
@@ -46,7 +59,16 @@ export default function DashboardPageView({ events }: DashboardPageViewProps) {
     <>
       <UserHeader />
       <div className = "container mx-auto px-4 mt-10">
-        <h1 className="text-3xl font-bold mb-6 text-left">Welcome Back, User!</h1>
+        <div className = "flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold">Welcome back, User!</h1>
+            <button
+              onClick={() => setOpenModal(true)}
+              className="flex items-center gap-2 bg-[#d6deed] text-black font-semibold px-4 py-2 rounded-xl hover:bg-[#c8d4eb] transition border border-[#b3bfd8]"
+            >
+              Add an Event
+              <span className="text-xl leading-none">+</span>
+            </button>
+        </div>
         <div className="overflow-x-auto shadow-lg border border-gray-300 rounded-lg">
             <table className="table w-full">
               <thead>
@@ -61,7 +83,6 @@ export default function DashboardPageView({ events }: DashboardPageViewProps) {
                 </tr>
               </thead>
               <tbody>
-                <tbody>
                   {events && events.length > 0 ? (
                     events.map((event, index) => (
                     <tr key={event.ID} className="hover:bg-gray-50 transition-colors">
@@ -94,19 +115,110 @@ export default function DashboardPageView({ events }: DashboardPageViewProps) {
                         </button>
                       </td>
                     </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={7} className="py-10 text-center text-gray-500">
-                    You haven't created any events yet.
-                  </td>
-                </tr>
-              )}
-            </tbody>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={7} className="py-10 text-center text-gray-500">
+                      You haven't created any events yet.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
       </div>
+    {openModal && (
+      <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
+        <div className="bg-white w-full max-w-3xl rounded-xl p-6 shadow-lg">
+          <h2 className="text-xl font-bold mb-4">Add New Event</h2>
+
+          {/* FORM START */}
+          <form className="space-y-4">
+              <label htmlFor="eventName" className="block text-gray-700 font-bold mb-1">
+                Event Name
+              </label>
+              <input
+                type="text"
+                placeholder="Event Name"
+                className="w-full border px-3 py-2 rounded-lg"
+              />
+
+              <label htmlFor="description" className="block text-gray-700 font-bold mb-1">
+                Description
+              </label>
+              <textarea
+                placeholder="Description"
+                className="w-full border px-3 py-2 rounded-lg"
+              />
+              
+              <label htmlFor="startTime" className="block text-gray-700 font-bold mb-1">
+                Start Time
+              </label>
+              <input
+                type="datetime-local"
+                className="w-full border px-3 py-2 rounded-lg"
+              />
+
+              <label htmlFor="endTime" className="block text-gray-700 font-bold mb-1">
+                End Time
+              </label>
+              <input
+                type="datetime-local"
+                className="w-full border px-3 py-2 rounded-lg"
+              />
+
+              <label htmlFor="location" className="block text-gray-700 font-bold mb-1">
+                Location
+              </label>
+              <input
+                type="text"
+                placeholder="Location"
+                className="w-full border px-3 py-2 rounded-lg"
+              />
+              <label htmlFor="imageUpload" className="block text-gray-700 font-bold mb-1">
+                Event Upload
+              </label>
+              <label
+                htmlFor="imageUpload"
+                className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer 
+                hover:bg-gray-100 transition"
+              >
+                <span className="text-gray-600">
+                  {fileName ? fileName : "Click to upload image"}
+                </span>
+              </label>
+
+              <input
+                ref={fileRef}
+                id="imageUpload"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  if (e.target.files && e.target.files.length > 0) {
+                    setFileName(e.target.files[0].name);
+                  }
+                }}
+              />
+
+              <button
+                type="submit"
+                className="bg-[#4F567E] text-white w-full py-2 rounded-lg hover:bg-[#3b4461]"
+              >
+                Save Event
+              </button>
+          </form>
+          {/* FORM END */}
+
+          <button
+            onClick={() => setOpenModal(false)}
+            className="mt-4 text-gray-500 hover:text-gray-700 w-full text-center"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    )}
     </>
   );
 }
