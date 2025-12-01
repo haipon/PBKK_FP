@@ -4,6 +4,7 @@ import (
 	"evora/initializers"
 	"evora/models"
 	"fmt"
+	"log"
 	"net/http"
 	"slices"
 	"strings"
@@ -121,6 +122,7 @@ func BookEvent(c *gin.Context) {
 	// Retrieve the user information from context
 	u, exists := c.Get("user")
 	if !exists {
+		log.Fatal("BookEvent : Unauthorized access")
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"error": "Unauthorized access",
 		})
@@ -129,6 +131,7 @@ func BookEvent(c *gin.Context) {
 
 	user, ok := u.(models.User)
 	if !ok {
+		log.Fatal("BookEvent : Can't obtain user")
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Cannot obtain user form context",
 		})
@@ -141,6 +144,7 @@ func BookEvent(c *gin.Context) {
 	result := initializers.DB.First(&event, id)
 
 	if result.Error != nil {
+		log.Fatal("BookEvent : No Items")
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "No items",
 		})
@@ -149,6 +153,52 @@ func BookEvent(c *gin.Context) {
 
 	// Associate the event with the user
 	err := initializers.DB.Model(&user).Association("BookedEvents").Append(&event)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+
+	// Successful
+	c.Status(http.StatusOK)
+
+}
+
+func BookEventRemove(c *gin.Context) {
+	// Retrieve the user information from context
+	u, exists := c.Get("user")
+	if !exists {
+		log.Fatal("BookEvent : Unauthorized access")
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": "Unauthorized access",
+		})
+		return
+	}
+
+	user, ok := u.(models.User)
+	if !ok {
+		log.Fatal("BookEvent : Can't obtain user")
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Cannot obtain user form context",
+		})
+		return
+	}
+
+	// Retrieve event
+	id := c.Param("id")
+	event := []models.Event{}
+	result := initializers.DB.First(&event, id)
+
+	if result.Error != nil {
+		log.Fatal("BookEvent : No Items")
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "No items",
+		})
+		return
+	}
+
+	// Associate the event with the user
+	err := initializers.DB.Model(&user).Association("BookedEvents").Delete(&event)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})

@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import UserHeader from "../../component/userHeader"
 
 interface BookedEvent {
@@ -17,26 +18,11 @@ interface BookedEventsPageViewProps {
 }
 
 
-export default function BookedEventsPageView() {
-  const [events, setEvents] = useState<BookedEvent[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const loadEvents = async () => {
-      const res = await fetch("http://localhost:8080/events/booked", {
-        credentials: "include",
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setEvents(data.events); // IMPORTANT: match your backend JSON
-      }
-      setLoading(false);
-    };
-
-    loadEvents();
-  }, []);
-
+export default function BookedEventsPageView({ events }: BookedEventsPageViewProps) {
+  const router = useRouter();
+  
+  const [bookingList, setBookingList] = useState<BookedEvent[]>(events);
+  
   const getEventStatus = (startStr: string, endStr: string) => {
     const now = new Date();
     const start = new Date(startStr);
@@ -47,6 +33,28 @@ export default function BookedEventsPageView() {
     return <span className="badge bg-gray-100 text-gray-600">Ended</span>;
   };
   
+  const cancelBooking = async (eventId: number) => {
+    try {
+      const res = await fetch(`http://localhost:8080/events/${eventId}/book`, {
+        method: "DELETE",
+        credentials: "include", 
+      });
+
+      if (res.ok) {
+        alert("Booking cancelled.");
+
+        setBookingList((prev) => prev.filter((e) => e.ID !== eventId));
+        router.refresh();
+      } else {
+        const data = await res.json();
+        alert(data.error || "Failed to cancel booking.");
+      }
+    } catch (error) {
+      console.error("Error cancelling:", error);
+      alert("Connection error.");
+    }
+  };
+
   return (
     <>
       <UserHeader />
@@ -62,6 +70,7 @@ export default function BookedEventsPageView() {
                   <th className="py-4 px-4 text-center">Date</th>
                   <th className="py-4 px-4 text-center">Location</th>
                   <th className="py-4 px-4 text-center">Status</th>
+                  <th className="py-4 px-4 text-center border-b">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -91,11 +100,20 @@ export default function BookedEventsPageView() {
                       <td className="py-4 px-4 text-center border-b">
                         {getEventStatus(event.TimeStart, event.TimeEnd)}
                       </td>
+                    <td className="py-4 px-4 text-center border-b">
+                      <button
+                        onClick={() => cancelBooking(event.ID)}
+                        className="text-red-600 hover:text-red-800 text-sm font-bold border border-red-200 bg-red-50 hover:bg-red-100 px-3 py-1 rounded-lg transition cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                    </td>
+                    
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={6} className="py-10 text-center text-gray-500">
+                    <td colSpan={7} className="py-10 text-center text-gray-500">
                       You haven't booked any events yet.
                       <br />
                       <a href="/main/events" className="text-blue-500 hover:underline mt-2 inline-block">

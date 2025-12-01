@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Header from "../../component/header";
 import UserHeader from "../../component/userHeader";
 
@@ -19,6 +20,7 @@ interface EventsPageViewProps {
   events: Event[];
   isAuthenticated: boolean;
   currentUserId?: number; 
+  bookedEventIds: number[];
 }
 
 // Helper function to format the date string (e.g., "January 1, 2026")
@@ -40,15 +42,62 @@ const EventDetailsModal = ({
   onClose,
   onBook,
   isCreator,
+  isAuthenticated,
+  isBooked,
 }: {
   event: Event | null;
   onClose: () => void;
   onBook: () => void;
   isCreator: boolean;
+  isAuthenticated: boolean;
+  isBooked: boolean;
 }) => {
+  const router = useRouter();
+  
   if (!event) return null;
 
-  const imgUrl = `http://localhost:8080/events/update/images/${event.ID}`;
+  const imgUrl = `http://localhost:8080/public/events/banner/${event.BannerFileName}`;
+
+const renderActionButtons = () => {
+    if (isCreator) {
+      return (
+        <span className="px-4 py-2 bg-gray-100 text-gray-500 rounded-xl text-sm font-medium border border-gray-200 cursor-not-allowed">
+          You organized this event
+        </span>
+      );
+    }
+    
+    if (!isAuthenticated) {
+      return (
+        <button
+          onClick={() => router.push("/login")}
+          className="cursor-pointer px-5 py-2 bg-gray-800 text-white rounded-xl text-base font-semibold hover:bg-gray-900 transition"
+        >
+          Log in to Book
+        </button>
+      );
+    }
+
+    if (isBooked) {
+      return (
+        <button
+          disabled
+          className="px-5 py-2 bg-green-100 text-green-700 border border-green-200 rounded-xl text-base font-semibold cursor-not-allowed flex items-center gap-2"
+        >
+          Booked
+        </button>
+      );
+    }
+
+    return (
+      <button
+        onClick={onBook}
+        className="cursor-pointer px-5 py-2 bg-blue-600 text-white rounded-xl text-base font-semibold hover:bg-blue-700 transition shadow-lg shadow-blue-200"
+      >
+        Book Event
+      </button>
+    );
+  };
 
   return (
     <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 p-4">
@@ -61,24 +110,15 @@ const EventDetailsModal = ({
           className="w-full h-56 md:h-72 object-cover rounded-2xl"
         />
 
-        {/* Title + Add Button */}
+        {/* Title + Action Button */}
         <div className="flex justify-between items-center mt-6">
           <h2 className="text-3xl font-bold leading-tight">{event.Name}</h2>
-
-          {!isCreator && (
-            <button
-              onClick={onBook}
-              className="px-5 py-2 bg-blue-600 text-white rounded-xl text-base font-semibold 
-                         hover:bg-blue-700 transition"
-            >
-              Add Event
-            </button>
-          )}
+          <div>{renderActionButtons()}</div>
         </div>
 
         {/* Creator */}
         <p className="text-gray-600 mt-1 text-base">
-          By {event.UserName ?? "User"}
+          By {event.Name ?? "User"}
         </p>
 
         {/* Description */}
@@ -128,7 +168,7 @@ const EventCard: React.FC<{ event: Event; onClick: () => void }> = ({
   event,
   onClick,
 }) => {
-  const imageUrl = `http://localhost:8080/events/update/images/${event.ID}`;
+  const imageUrl = `http://localhost:8080/public/events/banner/${event.BannerFileName}`;
   return (
     <div
       onClick={onClick}
@@ -155,25 +195,31 @@ export default function EventsPageView({
   events,
   isAuthenticated,
   currentUserId = 0,
+  bookedEventIds,
 }: EventsPageViewProps) {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const router = useRouter();
 
   // Booking function
   const bookEvent = async () => {
     if (!selectedEvent) return;
 
-    const res = await fetch(`http://localhost:8080/events/book/${selectedEvent.ID}`, {
+    const res = await fetch(`http://localhost:8080/events/${selectedEvent.ID}/book`, {
       method: "POST",
       credentials: "include",
     });
 
     if (res.ok) {
-      alert("Event added!");
+      alert("Event booked!");
       setSelectedEvent(null); // CLOSE MODAL
+      router.refresh();
     } else {
       alert("Failed to book event.");
     }
   };
+
+  const isCreator = currentUserId > 0 && Number(selectedEvent?.UserID) === Number(currentUserId);
+  const isBooked = selectedEvent ? bookedEventIds.includes(selectedEvent.ID) : false;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -209,11 +255,15 @@ export default function EventsPageView({
       </section>
 
       {/* Modal */}
+
+      
       <EventDetailsModal
         event={selectedEvent}
         onClose={() => setSelectedEvent(null)}
         onBook={bookEvent}
         isCreator={selectedEvent?.UserID === currentUserId}
+        isAuthenticated={isAuthenticated}
+        isBooked={isBooked}
       />
     </div>
   );

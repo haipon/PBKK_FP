@@ -45,6 +45,7 @@ func main() {
 		authorized.PATCH("/events/update/:id", controllers.UpdateEventByID)
 		authorized.POST("/events/update/images/:id", controllers.UploadEventImage)
 		authorized.DELETE("/events/update/:id", controllers.DeleteEventByIDSoft)
+		authorized.DELETE("/events/:id/book", controllers.BookEventRemove)
 		authorized.POST("/events/:id/book", controllers.BookEvent)
 
 		// Users
@@ -56,6 +57,9 @@ func main() {
 		// Testing
 		authorized.GET("/ping", controllers.TestPing)
 	}
+
+	// For serving uploaded files
+	r.Static("/public", "./public")
 
 	r.Run("localhost:8080")
 }

@@ -14,6 +14,6 @@ type Event struct {
 	BannerFileName string
 	TimeStart      time.Time
 	TimeEnd        time.Time
-	UserID         uint    `json:"-"`
+	UserID         uint
 	BookedBy       []*User `gorm:"many2many:user_events;" json:"-"`
 }

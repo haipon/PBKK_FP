@@ -52,3 +52,27 @@ export async function getPublicEventsServerSide() {
   const json = await res.json();
   return json.event; 
 }
+
+export async function getCurrentUserServerSide() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('Authorization');
+
+  if (!token) return null;
+
+  try {
+    const res = await fetch("http://localhost:8080/validate", {
+      method: 'GET',
+      cache: 'no-store',
+      headers: {
+        'Cookie': `Authorization=${token.value}`,
+      },
+    });
+
+    if (!res.ok) return null;
+
+    const json = await res.json();
+    return json.user; 
+  } catch (error) {
+    return null;
+  }
+}

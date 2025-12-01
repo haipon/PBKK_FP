@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState, useRef  } from "react";
+import { useState, useRef  } from "react";
+import { useRouter } from "next/navigation";
 import UserHeader from "../../component/userHeader"
 
 interface DashboardEvent {
@@ -19,6 +20,8 @@ interface DashboardPageViewProps {
 }
 
 export default function DashboardPageView({ events }: DashboardPageViewProps) {
+  const router = useRouter();
+  
   const [openModal, setOpenModal] = useState(false);
   const [fileName, setFileName] = useState<File | null>(null);
 
@@ -131,6 +134,29 @@ export default function DashboardPageView({ events }: DashboardPageViewProps) {
     return new Date(b.TimeStart).getTime() - new Date(a.TimeStart).getTime();
   });
   
+  const handleDeleteEvent = async (id: number) => {
+  const confirmed = confirm("Are you sure you want to delete this event?");
+  if (!confirmed) return;
+
+  try {
+    const res = await fetch(`http://localhost:8080/events/update/${id}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+
+    if (res.ok) {
+      alert("Event deleted successfully.");
+      router.refresh(); 
+    } else {
+      const data = await res.json();
+      alert(data.error || "Failed to delete event.");
+    }
+  } catch (error) {
+    console.error("Delete error:", error);
+    alert("Connection error.");
+  }
+};
+
   return (
     <>
       <UserHeader />
@@ -187,7 +213,7 @@ export default function DashboardPageView({ events }: DashboardPageViewProps) {
                     </td>
                     <td className="py-4 px-4 text-center border-b">
                       <button
-                        className="text-blue-600 hover:text-blue-800 text-sm font-semibold mr-2"
+                        className="text-blue-600 hover:text-blue-800 text-sm font-bold border border-blue-200 bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded-lg transition cursor-pointer"
                         onClick={() => {
                           setSelectedEvent(event);
                           setEventName(event.Name);
@@ -363,7 +389,7 @@ export default function DashboardPageView({ events }: DashboardPageViewProps) {
               {/* SUBMIT */}
               <button
                 type="submit"
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-semibold transition"
+                className="cursor-pointer w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-semibold transition"
               >
                 {isEditing ? "Save Changes" : "Create Event"}
               </button>
@@ -380,7 +406,7 @@ export default function DashboardPageView({ events }: DashboardPageViewProps) {
                     handleCloseModal();
                     window.location.reload();
                   }}
-                  className="w-full bg-red-500 hover:bg-red-600 text-white mt-2 py-3 rounded-xl font-semibold transition"
+                  className="cursor-pointer w-full bg-red-500 hover:bg-red-600 text-white mt-2 py-3 rounded-xl font-semibold transition"
                 >
                   Delete Event
                 </button>
@@ -390,7 +416,7 @@ export default function DashboardPageView({ events }: DashboardPageViewProps) {
               <button
                 type="button"
                 onClick={handleCloseModal}
-                className="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 mt-2 py-3 rounded-xl transition"
+                className="cursor-pointer w-full bg-gray-200 hover:bg-gray-300 text-gray-800 mt-2 py-3 rounded-xl transition"
               >
                 Cancel
               </button>
