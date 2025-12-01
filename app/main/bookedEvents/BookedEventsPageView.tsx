@@ -1,6 +1,6 @@
-
 'use client';
 
+import { useEffect, useState } from "react";
 import UserHeader from "../../component/userHeader"
 
 interface BookedEvent {
@@ -16,19 +16,35 @@ interface BookedEventsPageViewProps {
   events: BookedEvent[];
 }
 
-export default function BookedEventsPageView({events}: BookedEventsPageViewProps) {
+
+export default function BookedEventsPageView() {
+  const [events, setEvents] = useState<BookedEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadEvents = async () => {
+      const res = await fetch("http://localhost:8080/events/booked", {
+        credentials: "include",
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setEvents(data.events); // IMPORTANT: match your backend JSON
+      }
+      setLoading(false);
+    };
+
+    loadEvents();
+  }, []);
+
   const getEventStatus = (startStr: string, endStr: string) => {
     const now = new Date();
     const start = new Date(startStr);
     const end = new Date(endStr);
 
-    if (now < start) {
-      return <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-bold">Upcoming</span>;
-    } else if (now >= start && now <= end) {
-      return <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-bold">Running</span>;
-    } else {
-      return <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs font-bold">Ended</span>;
-    }
+    if (now < start) return <span className="badge bg-blue-100 text-blue-800">Upcoming</span>;
+    if (now <= end) return <span className="badge bg-green-100 text-green-800">Running</span>;
+    return <span className="badge bg-gray-100 text-gray-600">Ended</span>;
   };
   
   return (
