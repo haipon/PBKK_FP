@@ -17,9 +17,10 @@ interface DashboardEvent {
 
 interface DashboardPageViewProps {
   events: DashboardEvent[];
+  username: string;
 }
 
-export default function DashboardPageView({ events }: DashboardPageViewProps) {
+export default function DashboardPageView({ events, username }: DashboardPageViewProps) {
   const router = useRouter();
   
   const [openModal, setOpenModal] = useState(false);
@@ -162,7 +163,7 @@ export default function DashboardPageView({ events }: DashboardPageViewProps) {
       <UserHeader />
       <div className="container mx-auto px-4 mt-10">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Welcome back, User!</h1>
+          <h1 className="text-3xl font-bold">Welcome back, {username}!</h1>
           <button
             onClick={() => setOpenModal(true)}
             className="flex items-center gap-2 bg-[#d6deed] text-black font-semibold px-4 py-2 rounded-xl hover:bg-[#c8d4eb] transition border border-[#b3bfd8]"
@@ -179,7 +180,8 @@ export default function DashboardPageView({ events }: DashboardPageViewProps) {
                 <th className="py-4 px-4 text-center">No.</th>
                 <th className="py-4 px-4 text-center">Name</th>
                 <th className="py-4 px-4 text-center">Description</th>
-                <th className="py-4 px-4 text-center">Date</th>
+                <th className="py-4 px-4 text-center">Start</th>
+                <th className="py-4 px-4 text-center">End</th>
                 <th className="py-4 px-4 text-center">Location</th>
                 <th className="py-4 px-4 text-center">Status</th>
                 <th className="py-4 px-4 text-center">Actions</th>
@@ -201,6 +203,19 @@ export default function DashboardPageView({ events }: DashboardPageViewProps) {
                         </span>
                         <span className="text-xs text-gray-500">
                           {new Date(event.TimeStart).toLocaleTimeString([], {
+                            minute: "2-digit",
+                            hour: "2-digit",
+                          })}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-4 px-4 text-center border-b">
+                      <div className="flex flex-col">
+                        <span className="font-medium">
+                          {new Date(event.TimeEnd).toLocaleDateString()}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {new Date(event.TimeEnd).toLocaleTimeString([], {
                             minute: "2-digit",
                             hour: "2-digit",
                           })}
@@ -233,7 +248,7 @@ export default function DashboardPageView({ events }: DashboardPageViewProps) {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={7} className="py-10 text-center text-gray-500">
+                  <td colSpan={8} className="py-10 text-center text-gray-500">
                     You haven't created any events yet.
                   </td>
                 </tr>

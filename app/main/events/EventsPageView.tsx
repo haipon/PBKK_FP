@@ -70,7 +70,7 @@ const renderActionButtons = () => {
     if (!isAuthenticated) {
       return (
         <button
-          onClick={() => router.push("/login")}
+          onClick={() => router.push("/auth/login")}
           className="cursor-pointer px-5 py-2 bg-gray-800 text-white rounded-xl text-base font-semibold hover:bg-gray-900 transition"
         >
           Log in to Book

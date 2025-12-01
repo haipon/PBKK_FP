@@ -1,9 +1,11 @@
 import DashboardPageView from "./DashboardPageView";
-import { getCreatedEventsServerSide } from "../../services/serverEventService";
+import { getCreatedEventsServerSide, getCurrentUserServerSide } from "../../services/serverEventService";
 import UserHeader from "../../component/userHeader";
 
 export default async function DashboardPage() {
-  const events = await getCreatedEventsServerSide();
+  const [events, user] = await Promise.all([getCreatedEventsServerSide(), getCurrentUserServerSide()]);
+
+  const username = user ? user.Name : "User";
 
   if (!events) {
     return (
@@ -17,5 +19,5 @@ export default async function DashboardPage() {
     );
   }
 
-  return <DashboardPageView events={events} />;
+  return <DashboardPageView events={events} username={username}/>;
 }

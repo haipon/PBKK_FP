@@ -67,7 +67,8 @@ export default function BookedEventsPageView({ events }: BookedEventsPageViewPro
                   <th className="py-4 px-4 text-center">No.</th>
                   <th className="py-4 px-4 text-center">Name</th>
                   <th className="py-4 px-4 text-center">Description</th>
-                  <th className="py-4 px-4 text-center">Date</th>
+                  <th className="py-4 px-4 text-center">Start</th>
+                  <th className="py-4 px-4 text-center">End</th>
                   <th className="py-4 px-4 text-center">Location</th>
                   <th className="py-4 px-4 text-center">Status</th>
                   <th className="py-4 px-4 text-center border-b">Action</th>
@@ -88,8 +89,20 @@ export default function BookedEventsPageView({ events }: BookedEventsPageViewPro
                             {new Date(event.TimeStart).toLocaleDateString()}
                           </span>
                           <span className="text-xs text-gray-500">
-                            {/* Shows e.g., "08:30 PM" */}
                             {new Date(event.TimeStart).toLocaleTimeString([], {
+                              minute: '2-digit',
+                              hour: '2-digit',
+                            })}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4 text-center border-b">
+                        <div className="flex flex-col">
+                          <span className="font-medium">
+                            {new Date(event.TimeEnd).toLocaleDateString()}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            {new Date(event.TimeEnd).toLocaleTimeString([], {
                               minute: '2-digit',
                               hour: '2-digit',
                             })}
@@ -105,7 +118,7 @@ export default function BookedEventsPageView({ events }: BookedEventsPageViewPro
                         onClick={() => cancelBooking(event.ID)}
                         className="text-red-600 hover:text-red-800 text-sm font-bold border border-red-200 bg-red-50 hover:bg-red-100 px-3 py-1 rounded-lg transition cursor-pointer"
                       >
-                        Cancel
+                        Unbook
                       </button>
                     </td>
                     
