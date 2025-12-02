@@ -229,7 +229,7 @@ export default function EventsPageView({
       <div className="w-full flex justify-center mt-6">
         <div className="w-[90%] max-w-5xl rounded-3xl overflow-hidden relative">
           <img
-            src="/images/homepage.jpg"
+            src="/images/eventsPage.jpg"
             className="w-full h-48 object-cover"
           />
           <div className="absolute inset-0 bg-black/30 flex flex-col items-center justify-center text-white">
