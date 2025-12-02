@@ -177,7 +177,7 @@ const EventCard: React.FC<{ event: Event; onClick: () => void }> = ({
       <div className="h-32">
         <img src={imageUrl} alt={event.Name} className="w-full h-full object-cover" />
       </div>
-      <div className="p-3 bg-[#a7a9cc] text-white">
+      <div className="p-3 bg-[#a7a9cc] text-white h-full">
         <div className="flex justify-between items-start text-lg font-semibold">
           <h2 className="line-clamp-1">{event.Name}</h2>
           <span className="text-sm ml-2">{event.Location}</span>
@@ -255,8 +255,6 @@ export default function EventsPageView({
       </section>
 
       {/* Modal */}
-
-      
       <EventDetailsModal
         event={selectedEvent}
         onClose={() => setSelectedEvent(null)}
