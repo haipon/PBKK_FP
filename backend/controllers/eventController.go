@@ -213,11 +213,19 @@ func BookEventRemove(c *gin.Context) {
 // Retrieve
 func GetEventAll(c *gin.Context) {
 	event := []models.Event{}
-	result := initializers.DB.Find(&event)
+	search := c.Query("search")
+
+	query := initializers.DB
+
+	if search != "" {
+		query = query.Where("name ILIKE ?", "%"+search+"%")
+	}
+
+	result := query.Find(&event)
 
 	if result.Error != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "No items",
+			"error": "Error fetching events",
 		})
 		return
 	}

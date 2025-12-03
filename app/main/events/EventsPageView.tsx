@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useDebounce } from "use-debounce";
+import { useRouter, useSearchParams } from "next/navigation";
 import Header from "../../component/header";
 import UserHeader from "../../component/userHeader";
 
@@ -199,6 +200,19 @@ export default function EventsPageView({
 }: EventsPageViewProps) {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const [text, setText] = useState(searchParams.get("search") || "");
+
+  const [query] = useDebounce(text, 500);
+
+  useEffect(() => {
+    if (!query) {
+      router.push("/main/events"); // Clear search
+    } else {
+      router.push(`/main/events?search=${encodeURIComponent(query)}`);
+    }
+  }, [query, router]);
 
   // Booking function
   const bookEvent = async () => {
@@ -236,6 +250,26 @@ export default function EventsPageView({
             <h2 className="text-2xl font-semibold">Look Forward to these Events!</h2>
             <p className="text-sm mt-2">Find out the current and upcoming events.</p>
           </div>
+        </div>
+      </div>
+
+      <div className="w-[90%] max-w-6xl mx-auto mt-8">
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search events..."
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            className="w-full p-4 pl-12 rounded-xl border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none"
+          />
+          <svg
+            className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
         </div>
       </div>
 

@@ -125,7 +125,7 @@ func Validate(c *gin.Context) {
 	user := userInterface.(models.User)
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Logged In",
+		"message": "I am logged in",
 		"user":    user.ToResponse(),
 	})
 }

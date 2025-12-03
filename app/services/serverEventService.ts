@@ -41,8 +41,14 @@ export async function getBookedEventsServerSide() {
   return json.event; 
 }
 
-export async function getPublicEventsServerSide() {
-  const res = await fetch("http://localhost:8080/events", {
+export async function getPublicEventsServerSide(searchQuery: string = "") {
+  const url = new URL("http://localhost:8080/events");
+
+  if (searchQuery) {
+    url.searchParams.append("search", searchQuery);
+  }
+
+  const res = await fetch(url.toString(), {
     method: 'GET',
     cache: 'no-store',
   });
@@ -50,7 +56,7 @@ export async function getPublicEventsServerSide() {
   if (!res.ok) return [];
 
   const json = await res.json();
-  return json.event; 
+  return json.event || []; 
 }
 
 export async function getCurrentUserServerSide() {
