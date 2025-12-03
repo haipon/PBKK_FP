@@ -29,11 +29,6 @@ func RequireAuth(c *gin.Context) {
 		return
 	}
 
-	if err != nil || !token.Valid {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
-		return
-	}
-
 	if claims, ok := token.Claims.(jwt.MapClaims); ok {
 		// Check the expiry of the cookie
 		if float64(time.Now().Unix()) > claims["exp"].(float64) {
