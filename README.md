@@ -150,3 +150,35 @@ This folder is used to store uploaded event banners from the users. The banner f
 https://rabidhermawan-994092.postman.co/workspace/R.-Abid-Hermawan's-Workspace~6b41ae43-54f9-41ca-8f06-a7548bb933a6/collection/50274217-23fbd935-e153-47a8-812f-1f9b2443e982?action=share&creator=50274217
 
 
+## FrontEnd 
+
+### 1. Homepage
+![HomepageLoggedOut](public/ReadMe_Images/HomepageLoggedOut.png)
+![HomepageLoggedin](public/ReadMe_Images/HomepageLoggedIn.png)
+
+These two pages acts as an introductory page for the users, depending on whether they're logged in or not.
+
+### 2. Log in and Registration
+![LogIn](public/ReadMe_Images/LogIn.png)
+![register](public/ReadMe_Images/Register.png)
+
+Users can either log in or register if they want to create or book an event.
+
+### 3. Events Page
+![EventsPage](public/ReadMe_Images/EventsPage.png)
+![EventsDetails](public/ReadMe_Images/EventsDetails.png)
+
+Users are able to see the available events page and are also able to book an event of their choice.
+
+### 4. Booked Events Page
+![BookedEvents](public/ReadMe_Images/BookedEvents.png)
+
+Users are able to see what they have booked from the events page. Users are also able to unbook an event just by clicking the Unbook button
+
+### 5. Dashboard
+![Dashboard](public/ReadMe_Images/Dashboard.png)
+![CreateEvent](public/ReadMe_Images/CreateEvent.png)
+![EditEvent](public/ReadMe_Images/EditEvent.png)
+
+This page allows the users to see the events they have created so far, edit or delete an event, as well as add a new event.
+
