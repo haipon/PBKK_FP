@@ -121,10 +121,11 @@ func Signout(c *gin.Context) {
 
 func Validate(c *gin.Context) {
 	// Get user from context
-	user, _ := c.Get("user")
+	userInterface, _ := c.Get("user")
+	user := userInterface.(models.User)
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "I am logged in",
-		"user":    user,
+		"message": "Logged In",
+		"user":    user.ToResponse(),
 	})
 }
