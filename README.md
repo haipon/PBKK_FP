@@ -1,3 +1,8 @@
+<p align="center">
+  <img src="public\logo.png" />
+</p>
+<br>
+
 # Evora - Event Viewer
 ## Name : 
 - R. Rafif Aqil Aabid Hermawan (5025231069)
