@@ -126,7 +126,7 @@ export default function BookedEventsPageView({ events }: BookedEventsPageViewPro
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={7} className="py-10 text-center text-gray-500">
+                    <td colSpan={8} className="py-10 text-center text-gray-500">
                       You haven't booked any events yet.
                       <br />
                       <a href="/main/events" className="text-blue-500 hover:underline mt-2 inline-block">
